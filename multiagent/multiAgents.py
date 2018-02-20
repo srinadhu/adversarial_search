@@ -69,11 +69,32 @@ class ReflexAgent(Agent):
         # Useful information you can extract from a GameState (pacman.py)
         successorGameState = currentGameState.generatePacmanSuccessor(action)
         newPos = successorGameState.getPacmanPosition()
-        newFood = successorGameState.getFood()
+        newFood = successorGameState.getFood().asList()
         newGhostStates = successorGameState.getGhostStates()
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
-        return successorGameState.getScore()
+        score = 0
+        #If it's a food great which is really important here.
+        if (currentGameState.getFood()[newPos[0]][newPos[1]]):
+            score +=1
+
+        #calculate all the distance to food less it is it's better.
+        current_food = newPos
+        for food in newFood:
+            #return the nearest_food using the below line.
+            nearest_food = min(newFood, key=lambda x: manhattanDistance(x, current_food))
+            score += 1.0/manhattanDistance(nearest_food, current_food)
+            newFood.remove(nearest_food)
+            current_food = nearest_food
+
+        #ghost distances if less than some basic return large negative value
+        if ( min([manhattanDistance(newPos, ghost.getPosition()) for ghost in newGhostStates]) == 1):
+            return -1000
+
+        #add the Score as well.
+        score += successorGameState.getScore()
+
+        return score
 
 def scoreEvaluationFunction(currentGameState):
     """
@@ -143,7 +164,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
     def Max_Value (self, gameState, depth):
         """For the Max Player here Pacman"""
 
-        if ((depth >= self.depth)  or (len(gameState.getLegalActions(0)) == 0)):
+        if ((depth == self.depth)  or (len(gameState.getLegalActions(0)) == 0)):
             return self.evaluationFunction(gameState)
 
         return max([self.Min_Value(gameState.generateSuccessor(0, action), 1, depth) for action in gameState.getLegalActions(0)])
@@ -186,6 +207,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
     def Min_Value (self, gameState, agentIndex, depth, alpha, beta):
         """ For Min agents best move """
+
         if (len(gameState.getLegalActions(agentIndex)) == 0): #No Legal actions.
             return self.evaluationFunction(gameState)
 
@@ -205,7 +227,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     def Max_Value (self, gameState, depth, alpha, beta):
         """For Max agents best move"""
 
-        if (depth >= self.depth or len(gameState.getLegalActions(0)) == 0):
+        if (depth == self.depth or len(gameState.getLegalActions(0)) == 0):
             return self.evaluationFunction(gameState)
 
         action_value = float('-inf')
@@ -246,7 +268,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
     def Max_Value (self, gameState, depth):
         """For the Max Player here Pacman"""
 
-        if ((depth >= self.depth)  or (len(gameState.getLegalActions(0)) == 0)):
+        if ((depth == self.depth)  or (len(gameState.getLegalActions(0)) == 0)):
             return self.evaluationFunction(gameState)
 
         return max([self.Min_Value(gameState.generateSuccessor(0, action), 1, depth) for action in gameState.getLegalActions(0)])
@@ -272,37 +294,50 @@ def betterEvaluationFunction(currentGameState):
       Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
       evaluation function (question 5).
 
-      DESCRIPTION: <write something here so we know what you did>
+      DESCRIPTION: Inverse sums of nearest food distances and capsule distances, adding game score,
+      subtracting ghost distance and remaining food. 
     """
 
     GhostStates = currentGameState.getGhostStates() #all the ghost states
     Pacman_Pos = currentGameState.getPacmanPosition()
     food_list = (currentGameState.getFood()).asList() #get all the food as list.
+    capsule_list = currentGameState.getCapsules() #get all the capsules.
+    no_food = len(food_list)
+    no_capsule = len(capsule_list)
 
     state_score = 0 #initializing to zero.
 
-    #Feature 1 More legal action more better it is
-    state_score += len(currentGameState.getLegalActions(0)) / 4
+    #Feature 1 no of Legalactions: Not working well
+    #state_score += len(currentGameState.getLegalPacmanActions())/40.0
 
     #Feature 2 distances from ghosts if exists
     if currentGameState.getNumAgents() > 1:
-        for ghost in GhostStates:
-            ghost_dis = manhattanDistance(Pacman_Pos, ghost.getPosition())
-            if (ghost_dis == 0):
-                return -100
-            state_score -= 1/ghost_dis
+        ghost_dis = min( [manhattanDistance(Pacman_Pos, ghost.getPosition()) for ghost in GhostStates])
+        if (ghost_dis < 2):
+            return -10000
+        state_score -= 1.0/ghost_dis
 
     #Feature 3 food positions
     current_food = Pacman_Pos
     for food in food_list:
-        closestFood = min(food, key=lambda x: manhattanDistance(x, currentFood))
-        remainingFoodDistance += 1.0/Distance(closestFood, currentFood) # Inverting value
-        currentFood = closestFood
-        food.remove(currentFood)
-        state_score += 1/(manhattanDistance(current_food, food))
+        closestFood = min(food_list, key=lambda x: manhattanDistance(x, current_food))
+        state_score += 1.0/(manhattanDistance(current_food, closestFood))
+        current_food = closestFood
+        food_list.remove(closestFood)
+
+    #Feature 4 capsule positions
+    current_capsule = Pacman_Pos
+    for capsule in capsule_list:
+        closest_capsule = min(capsule_list, key=lambda x: manhattanDistance(x, current_capsule))
+        state_score += 1.0/(manhattanDistance(current_capsule, closest_capsule))
+        current_capsule = closest_capsule
+        capsule_list.remove(closest_capsule)
 
     #Feature 4 Score of the game
-    state_score += currentGameState.getScore()
+    state_score += 8*(currentGameState.getScore())
+
+    #Feature 5: remaining food and capsule
+    state_score -= 6*(no_food + no_capsule)
 
     return state_score
 
