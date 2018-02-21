@@ -1,4 +1,4 @@
-adversarial_search
+Adversarial search
 ======================
 
 Introduction
