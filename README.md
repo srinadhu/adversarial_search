@@ -6,9 +6,13 @@ Introduction
 
 In this project designed agents for the classic version of Pacman, including ghosts and along the way implemented minimax and expectimax search and tried hand at evaluation function design. This is part of Pacman projects developed at [UC Berkeley](http://ai.berkeley.edu/multiagent.html). 
 
+
 Directory Structure
 -------------------
 
+---multiagent
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [multiAgents.py](multiagent/multiAgents.py)
 
 ---[lab.pdf](lab.pdf)
 
