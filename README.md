@@ -25,40 +25,35 @@ Then run the autograder using $python autograder.py
 It gave us a score of 25/25.
 
 
-Finding a Fixed Food Dot using Depth First Search
--------------------------------------------------
-$python pacman.py -l tinyMaze -p SearchAgent
+Reflex Agent
+------------
+$python pacman.py -p ReflexAgent -l testClassic
 
-$python pacman.py -l mediumMaze -p SearchAgent
+$python pacman.py --frameTime 0 -p ReflexAgent -k 1
 
-$python pacman.py -l bigMaze -z .5 -p SearchAgent
+$python pacman.py --frameTime 0 -p ReflexAgent -k 2
 
-Breadth First Search
---------------------
-$python pacman.py -l mediumMaze -p SearchAgent -a fn=bfs
+Minimax
+-------
+$python pacman.py -p MinimaxAgent -l minimaxClassic -a depth=4
 
-$python pacman.py -l bigMaze -p SearchAgent -a fn=bfs -z .5
+$python pacman.py -p MinimaxAgent -l trappedClassic -a depth=3
 
-$python eightpuzzle.py
+Alpha-Beta Pruning
+------------------
+$python pacman.py -p AlphaBetaAgent -a depth=3 -l smallClassic
 
-Varying the Cost Function
--------------------------
-$python pacman.py -l mediumMaze -p SearchAgent -a fn=ucs
+Expectimax
+----------
+$python pacman.py -p ExpectimaxAgent -l minimaxClassic -a depth=3
 
-$python pacman.py -l mediumDottedMaze -p StayEastSearchAgent
+$python pacman.py -p AlphaBetaAgent -l trappedClassic -a depth=3 -q -n 10
 
-$python pacman.py -l mediumScaryMaze -p StayWestSearchAgent
+$python pacman.py -p ExpectimaxAgent -l trappedClassic -a depth=3 -q -n 10
 
-A* search
----------
-$python pacman.py -l bigMaze -z .5 -p SearchAgent -a fn=astar,heuristic=manhattanHeuristic
-
-Finding All the Corners
------------------------
-$python pacman.py -l tinyCorners -p SearchAgent -a fn=bfs,prob=CornersProblem
-
-$python pacman.py -l mediumCorners -p SearchAgent -a fn=bfs,prob=CornersProblem
-
+Evaluation Function
+-------------------
+$python autograder.py -q q5
 
 Developed by
 ------------
